@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Home</title>
+
+    <!-- Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;0,800;1,300;1,400;1,600;1,700;1,800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Libraries: bootstrap, slick-slide,... -->
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles/bootstrap.min.css') }}"
+    />
+    <link
+      href="{{ url_for('static', filename='styles/dataTables.bootstrap.css') }}"
+      rel="stylesheet"
+    />
+
+    <!-- Static style  -->
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{{ url_for('static', filename='styles/index.css') }}"
+    />
+  </head>
+
+  <body>
+    <header class="header">
+      <div class="container-md">
+        <a href="/" class="link-page">
+          <h2>
+            SMS Message Spam Detector
+          </h2>
+        </a>
+      </div>
+    </header>
+
+    <main class="pt-5 pb-5">
+      <div class="container-md">
+        <!-- Preprocessing -->
+        <section class="preprocessing-form">
+          <form
+            action="{{ url_for('preprocessing')}}"
+            method="POST"
+            id="f-preprocessing"
+            class="row mx-0"
+          >
+            <div class="custom-file col-md-6">
+              <input
+                type="file"
+                class="custom-file-input"
+                id="customFile"
+                name="customFile"
+                accept=".csv"
+                required
+              />
+              <label class="custom-file-label" for="customFile"
+                >File dataset</label
+              >
+            </div>
+            <div class="col-md-6">
+              <button
+                id="review"
+                type="button"
+                class="btn btn-secondary ml-3 mr-3"
+              >
+                Review
+              </button>
+              <input
+                type="submit"
+                class="btn btn-primary"
+                value="Preprocessing"
+              />
+              <div class="modal fade" id="modalReview">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h4 class="modal-title">Reviewing Dataset</h4>
+                      <button type="button" class="close" data-dismiss="modal">
+                        &times;
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                      <div id="table-review"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </section>
+
+        <!-- Progress -->
+        {% if res['pre_train_data'] != None %}
+        <section class="preprocessing row" id="preprocessing_section">
+          <div class="col-md-4 mb-3 mt-4">
+            <h3>Preprocessing progress</h3>
+            <ul class="preprocessing-step my-4">
+              <li class="d-none">Remove web link and apostrophes.</li>
+              <li class="d-none">Remove punctuations and filter stopword.</li>
+              <li class="d-none">Convert to vector from sentences.</li>
+              <li class="d-none">Split train and test set</li>
+            </ul>
+          </div>
+          <div class="col-md-2 mb-3">
+            <div class="connector" id="connector-preprocessing"></div>
+          </div>
+          <div class="col-md-6 mb-3 mt-4">
+            {% if res['pre_train_data'] != None %}
+            <div class="pre-train-dataset">
+              <table
+                id="table_dataset"
+                class="table table-responsive-lg table-bordered table-striped table-hoverd"
+              >
+                <thead>
+                  <tr>
+                    <th width="10%">.NO</th>
+                    <th width="65%">Message</th>
+                    <th width="10%">Label</th>
+                    <th width="15%">Num Class</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for result in res['pre_train_data'][:5] %}
+                  <tr>
+                    <td>{{loop.index}}</td>
+                    <td>{{result[1]}}</td>
+                    <td>{{result[0]}}</td>
+                    <td>{{result[2]}}</td>
+                  </tr>
+                  {% endfor %}
+                  <tr>
+                    <td>...</td>
+                    <td>...</td>
+                    <td>...</td>
+                    <td>...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            {% endif %}
+          </div>
+        </section>
+        {% endif %}
+        <hr />
+
+        <!-- Train -->
+        <section class="train-section row" id="train_section">
+          <div class="col-md-5 mb-3">
+            <h3 class="mb-4 text-center">Training</h3>
+            <form action="{{ url_for('train')}}" method="POST">
+              <div class="row mb-3">
+                <label class="col-md-4 mb-0 align-self-center pr-0" for="model"
+                  >Select Model</label
+                >
+                <div class="col-md-8">
+                  <select
+                    class="form-control"
+                    name="model"
+                    id="model"
+                    value="{{ res['train_id'] }}"
+                  >
+                    <option value="-1">All</option>
+                    <option value="3">Long Short Term Memory(LSTM)</option>
+                    <option value="4">Support Vector Machines(SVM)</option>
+                  </select>
+                </div>
+              </div>
+              <hr />
+              <div class="model-preview" id="model-preview">
+                <img
+                  src="{{ url_for('static',filename='images/-1-train.jpg') }}"
+                  alt=""
+                />
+              </div>
+              <input type="submit" class="btn btn-primary" value="train" />
+            </form>
+          </div>
+          {% if res['train_result'] != None %}
+          <div class="col-md-7 mb-3">
+            <h3 class="mb-4 text-center">Output</h3>
+            <ul class="output-train pl-0">
+              {% for key, value in res['train_result'].items() %}
+              <li class="row mx-0">
+                <div class="col-md-4">
+                  <span class="text-monospace measure-text">{{key}}</span>
+                </div>
+                <div class="col-md-8">
+                  <div class="progress h-100">
+                    <div
+                      class="progress-bar progress-bar-striped progress-bar-animated"
+                      style="width: {{value}}%;"
+                    >
+                      {{value}}%
+                    </div>
+                  </div>
+                </div>
+              </li>
+              {% endfor %}
+            </ul>
+            <hr />
+            <form
+              action="{{ url_for('predict') }}"
+              method="POST"
+              class="pl-3"
+              id="predict_section"
+            >
+              <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item">
+                  <a
+                    class="nav-link {{'' if res['predict_result'] != None and res['predict_label'] == '' else
+                    'active'}}"
+                    data-toggle="tab"
+                    href="#predictMessage"
+                    >Message</a
+                  >
+                </li>
+                <li
+                  class="nav-item {{'active' if res['predict_result'] != None and res['predict_label'] == '' else
+                ''}}"
+                >
+                  <a class="nav-link" data-toggle="tab" href="#predictFile"
+                    >File</a
+                  >
+                </li>
+              </ul>
+              <div class="tab-content">
+                <div
+                  id="predictMessage"
+                  class="container tab-pane px-0 pt-3 pb-1 fade {{'' if res['predict_result'] != None and res['predict_label'] == '' else
+                  'show active'}}"
+                >
+                  <div class="form-group">
+                    <label for="predictLabel">Message:</label>
+                    <textarea
+                      class="form-control"
+                      rows="3"
+                      id="predictLabel"
+                      name="predictLabel"
+                    >
+                  {{res['predict_label'] if res['predict_result'] != None else ''}}</textarea
+                    >
+                  </div>
+                </div>
+                <div
+                  id="predictFile"
+                  class="container tab-pane px-0 pt-3 pb-5 fade {{'show active' if res['predict_result'] != None and res['predict_label'] == '' else
+                  ''}}"
+                >
+                  <div class="form-group">
+                    <label>File:</label>
+                    <div class="custom-file">
+                      <input
+                        type="file"
+                        class="custom-file-input"
+                        id="filename"
+                        name="filename"
+                        accept=".csv"
+                      />
+                      <label class="custom-file-label" for="filename"
+                        >Predict file</label
+                      >
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary">Predict</button>
+              {% if res['predict_result'] != None and res['predict_label'] != ''
+              %}
+              <span class="predict-result">
+                Result: {{'ham' if res['predict_result'] == 0 else
+                'spam'}}</span
+              >
+              {% endif %} {% if res['predict_result'] != None and
+              res['predict_label'] == '' %}
+              <!-- <button
+                id="reviewFileRes"
+                type="button"
+                class="btn btn-secondary ml-3 mr-3"
+              >
+                Review
+              </button> -->
+              {% endif %}
+            </form>
+          </div>
+          {% endif %}
+        </section>
+
+        <!-- Chart -->
+        {% if res['chart_result'] != None %}
+        <section class="text-center mb-3 border-top pt-3">
+          <h3 class="mb-3">Chart and Measurements</h3>
+          <canvas id="bar-chart" width="800" height="450"></canvas>
+        </section>
+        {% endif %}
+      </div>
+    </main>
+    <footer class="footer">
+      <div class="container-md">
+        <h5>
+          Copyright &copy; 2020 Team 9.
+        </h5>
+      </div>
+    </footer>
+
+    <!-- Libraries: bootstrap, jquery, chartjs -->
+    <script src="{{ url_for('static', filename='scripts/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/popper.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/Chart.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/jquery.csv.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/dataTables.bootstrap.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/index.js') }}"></script>
+    <script>
+      // Chart
+
+      var chartResult = {{ res['chart_result']| tojson }};
+      if (chartResult) {
+        const labelData = chartResult.map(({ trainer }) => trainer);
+        const accScoreData = chartResult.map(
+          ({ result }) => result["accuracy"]
+        );
+        const precScoreData = chartResult.map(
+          ({ result }) => result["precision"]
+        );
+        const recallScoreData = chartResult.map(
+          ({ result }) => result["recall"]
+        );
+        const f1ScoreData = chartResult.map(({ result }) => result["f1_score"]);
+        const COLORS = ["#3e95cd", "#8e5ea2", "#3cba9f", "#e8c3b9", "#c45850"];
+        var barChartData = {
+          labels: labelData,
+          datasets: [
+            {
+              label: "Accuracy",
+              backgroundColor: COLORS[0],
+              data: accScoreData,
+            },
+            {
+              label: "Precision",
+              backgroundColor: COLORS[1],
+              data: precScoreData,
+            },
+            {
+              label: "Recall",
+              backgroundColor: COLORS[2],
+              data: recallScoreData,
+            },
+            {
+              label: "F1-score",
+              backgroundColor: COLORS[3],
+              data: f1ScoreData,
+            },
+          ],
+        };
+
+        var chartOptions = {
+          responsive: true,
+          legend: {
+            position: "bottom",
+            padding: 10,
+          },
+          title: {
+            display: true,
+            text: "SMS detector by Data Mining",
+            fontSize: 22,
+            lineHeight: 1.5,
+          },
+          scales: {
+            yAxes: [
+              {
+                ticks: {
+                  beginAtZero: true,
+                },
+              },
+            ],
+          },
+          animation: {
+            duration: 1,
+            onComplete: function () {
+              var chartInstance = this.chart,
+                ctx = chartInstance.ctx;
+
+              ctx.font = Chart.helpers.fontString(
+                "20px",
+                Chart.defaults.global.defaultFontStyle,
+                Chart.defaults.global.defaultFontFamily
+              );
+              ctx.textAlign = "center";
+              ctx.textBaseline = "bottom";
+              ctx.fillStyle = "white";
+
+              this.data.datasets.forEach(function (dataset, i) {
+                var meta = chartInstance.controller.getDatasetMeta(i);
+                meta.data.forEach(function (bar, index) {
+                  var data = dataset.data[index];
+                  ctx.fillText(Math.round(data * 1000) / 1000, bar._model.x, bar._model.y + 100);
+                });
+              });
+            },
+          },
+        };
+
+        new Chart($("#bar-chart"), {
+          type: "bar",
+          data: barChartData,
+          options: chartOptions,
+        });
+      }
+    </script>
+  </body>
+</html>

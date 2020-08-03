@@ -1,0 +1,158 @@
+/*
+  Globals
+*/
+*,
+*::before,
+*::after {
+  border-radius: 0 !important;
+}
+body {
+  font-family: "Open Sans", sans-serif;
+}
+img {
+  width: 100%;
+}
+
+/* scroll bar */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-thumb {
+  background: #f70;
+}
+::-webkit-scrollbar-track {
+  background: #f6f6f6;
+}
+
+/*
+  Utilities
+*/
+.btn-primary {
+  background-color: midnightblue;
+  border-color: blue;
+}
+.btn-primary:hover {
+  color: #fff;
+  background-color: blue;
+  /* border-color: blue; */
+}
+.modal-dialog {
+  max-width: 90%;
+}
+
+/*
+  Header
+*/
+.header {
+  background-image: linear-gradient(to bottom right, midnightblue, green);
+  padding: 1em 0;
+  color: white;
+}
+
+.link-page:hover {
+  color: #fff;
+  text-decoration: none;
+}
+.link-page {
+  color: #fff;
+  text-decoration: none;
+  background-color: transparent;
+}
+
+/*
+  Main
+*/
+.model-preview {
+  width: 100%;
+  height: 271px;
+  border: 1px solid #ced4da;
+  margin-bottom: 1em;
+  padding: 1em;
+}
+.model-preview img {
+  height: 100%;
+}
+.preprocessing-step {
+  list-style: none;
+  padding-left: 1.5em;
+  min-height: 30em;
+}
+.preprocessing-step li {
+  list-style: none;
+  margin-bottom: 1em;
+}
+.preprocessing-step li::before {
+  position: absolute;
+  content: "";
+  background: url("../images/spin.gif");
+  width: 16px;
+  height: 16px;
+  background-size: 100%;
+  left: 15px;
+  margin-top: 4px;
+}
+.preprocessing-step .done::before {
+  background-image: url("../images/checked.png");
+}
+.connector {
+  width: 100%;
+  height: 30px;
+  margin-top: 12em;
+  background-image: url("../images/connector-done.PNG");
+  background-size: contain;
+  background-position: center center;
+  background-repeat: no-repeat;
+  transform: rotate(180deg);
+  display: none;
+  animation-name: load-connector;
+  animation-duration: 5s;
+}
+@keyframes load-connector {
+  0% {
+    background-image: url("../images/connector.gif");
+  }
+  100% {
+    background-image: url("../images/connector.gif");
+  }
+}
+.pre-train-dataset table {
+  display: none;
+  animation-name: fadeIn;
+  animation-duration: 5s;
+}
+
+@keyframes fadeIn {
+  0% {
+    visibility: hidden;
+  }
+  100% {
+    visibility: hidden;
+  }
+}
+.output-train {
+  list-style: none;
+}
+
+.output-train li {
+  margin-bottom: 1em;
+}
+
+.output-train .measure-text {
+  font-size: 1em;
+}
+
+.predict-result {
+  margin-left: 2em;
+  padding: 6px 12px;
+  border: 1px solid gray;
+}
+
+/*
+  Footer
+*/
+.footer {
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 1em 0;
+  color: white;
+}
